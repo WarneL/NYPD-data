@@ -1,0 +1,108 @@
+---
+title: "NYPD Shooting Data project for R"
+author: "LWarne"
+date: "September 10, 2021"
+output:
+  pdf_document: default
+  html_document: 
+    theme: cosmo
+    df_print: tibble
+---
+
+## Library in Tidyverse and Lubridate
+
+library(lubridate)
+library(tidyverse)
+
+
+## Data selection 
+<"https://data.cityofnewyork.us/api/views/833y-fsy8/rows.csv?accessType=DOWNLOAD">
+
+## Import Data
+``` {r nypd} 
+nypd <- read.csv("https://data.cityofnewyork.us/api/views/833y-fsy8/rows.csv?accessType=DOWNLOAD")
+summary(nypd)
+```
+
+## Show internal 
+```{r structure}
+str(nypd)
+```
+- Confirmed as a **data.frame** with 23,568 rows of observations and 19 columns - dates **mdy** and times *as characters* along with the majority of data of interest for analysis.
+
+
+## Tidy and Transform
+"This *.csv* is already a data.frame with vectors which simplifies the cleaning. Copying the list of columns allows for easier writing of code with fewer errors as some are capitalized, some are not and not all contain the *underscore*."
+
+## List of columns
+INCIDENT_KEY	OCCUR_DATE	OCCUR_TIME	BORO	PRECINCT	JURISDICTION_CODE	LOCATION_DESC	STATISTICAL_MURDER_FLAG	PERP_AGE_GROUP	PERP_SEX	PERP_RACE	VIC_AGE_GROUP	VIC_SEX	VIC_RACE	X_COORD_CD	Y_COORD_CD	Latitude	Longitude	Lon_Lat
+
+## Remove columns unused for Analysis
+
+```{r rmv_cols}
+nypd$JURISDICTION_CODE <-NULL
+nypd$PRECINCT <-NULL
+nypd$X_COORD_CD <-NULL
+nypd$INCIDENT_KEY <-NULL
+nypd$Y_COORD_CD <-NULL
+nypd$Lon_Lat <-NULL
+nypd$Latitude <-NULL
+nypd$Longitude <-NULL
+```
+
+## Missing data
+The NYPD Historic Shooting Data runs for fourteen years 2006-2020, for many of the rows (observation points) data is missing in relation to perpetrators. This includes 8,425 cases where Perp Age Group, Sex and Race are all missing. The PERP_AGE_GROUP contains three notably inaccurate age groups - 224,940 and 1020 - that were most likely entry errors. In addition, sex in both perpetrator and victim columns is listed as U for unknown in some cases instead of being blank. Data is complete for date, time, and BORO which provides insight into timing and location of occurrences. For this purpose, the data is the data and will allow the blank counts to appear as blanks.
+
+
+## Visualize data points
+Raw data Plot of Occurences by Victim Age Groups
+
+```{r vicage, echo=FALSE}
+nypd <- read.csv("https://data.cityofnewyork.us/api/views/833y-fsy8/rows.csv?accessType=DOWNLOAD")
+library(tidyverse)
+
+qplot(nypd[1:23568,12], xlab = "NYPD Shootings by Victim Age")
+
+```
+
+**Comparison** with  Barplot of Occurrences by Pepetrator Age Groups
+
+``` {r perp, echo=FALSE}
+nypd <- read.csv("https://data.cityofnewyork.us/api/views/833y-fsy8/rows.csv?accessType=DOWNLOAD")
+library(tidyverse)
+nypd$JURISDICTION_CODE <-NULL
+nypd$PRECINCT <-NULL
+nypd$X_COORD_CD <-NULL
+nypd$INCIDENT_KEY <-NULL
+nypd$Y_COORD_CD <-NULL
+nypd$Lon_Lat <-NULL
+nypd$Latitude <-NULL
+nypd$Longitude <-NULL
+perp_age <- table(nypd$PERP_AGE_GROUP)
+barplot(perp_age)
+```
+
+```{r boro, echo=FALSE}
+nypd <- read.csv("https://data.cityofnewyork.us/api/views/833y-fsy8/rows.csv?accessType=DOWNLOAD")
+library(tidyverse)
+nypd$JURISDICTION_CODE <-NULL
+nypd$PRECINCT <-NULL
+nypd$X_COORD_CD <-NULL
+nypd$INCIDENT_KEY <-NULL
+nypd$Y_COORD_CD <-NULL
+nypd$Lon_Lat <-NULL
+nypd$Latitude <-NULL
+nypd$Longitude <-NULL
+BORO <- table(nypd$BORO)
+barplot(BORO)
+```
+
+**Manhattan** (2921) and **Staten Island** (698) shootings respectively are not labeled
+
+## Conclusion and Bias
+Serious bias - this is my first time creating an R Markdown document and I kept it simple. I enjoyed seeing the data become real, but it was a challenge to write the code and then make the visuals appear.
+
+In thinking of my own Human Resources perspective, the only conclusion I would draw from this data, would be to evaluate whether enough effective mindfulness or mental health supports are available for officers. For usefulness, in addition to shooting data, BORO  population numbers would be useful along with size of police forces in each BORO.  I would also consider the possibility of increasing community information regarding gun safety. 
+
+Before providing this information for legislative or business decision making, I feel that additional data is required for accurate analysis and comparison. This data might incorprate data from similar cities or additional internal data that accurately documents police shooting data to determine if any of the blanks are NYPD department related.
+
